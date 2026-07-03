@@ -14,4 +14,14 @@
     <string name="export_count">Đã xuất: %1$d ảnh (Pictures/TetherShot)</string>
     <string name="process_image">Xử lý ảnh từ bộ nhớ (thử preset)</string>
     <string name="preview_section">Ảnh mới nhất</string>
+    <string name="edit_section">Chỉnh sửa</string>
+    <string name="filter_hint">Chọn filter</string>
+    <string name="slider_exposure">Phơi sáng</string>
+    <string name="slider_contrast">Tương phản</string>
+    <string name="slider_saturation">Bão hoà màu</string>
+    <string name="slider_temperature">Nhiệt độ màu</string>
+    <string name="slider_skin_smooth">Làm mịn da</string>
+    <string name="slider_grain">Grain (hạt phim)</string>
+    <string name="reset_edits">Đặt lại chỉnh sửa</string>
+    <string name="batch_process">Batch: xử lý nhiều ảnh cùng lúc</string>
 </resources>

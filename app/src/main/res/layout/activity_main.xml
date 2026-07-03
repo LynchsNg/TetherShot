@@ -110,6 +110,118 @@
             android:layout_marginTop="4dp"
             android:textAppearance="?attr/textAppearanceBodySmall" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/edit_section"
+            android:textAppearance="?attr/textAppearanceTitleMedium" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/filter_hint">
+
+            <AutoCompleteTextView
+                android:id="@+id/spinnerFilter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/slider_exposure"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <SeekBar
+            android:id="@+id/seekExposure"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:min="-100"
+            android:max="100"
+            android:progress="0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/slider_contrast"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <SeekBar
+            android:id="@+id/seekContrast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:min="-100"
+            android:max="100"
+            android:progress="0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/slider_saturation"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <SeekBar
+            android:id="@+id/seekSaturation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:min="-100"
+            android:max="100"
+            android:progress="0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/slider_temperature"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <SeekBar
+            android:id="@+id/seekTemperature"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:min="-100"
+            android:max="100"
+            android:progress="0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/slider_skin_smooth"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <SeekBar
+            android:id="@+id/seekSkinSmooth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="0" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/slider_grain"
+            android:textAppearance="?attr/textAppearanceBodySmall" />
+
+        <SeekBar
+            android:id="@+id/seekGrain"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="0" />
+
+        <Button
+            android:id="@+id/btnResetEdits"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/reset_edits" />
+
         <Button
             android:id="@+id/btnProcessImage"
             style="?attr/materialButtonOutlinedStyle"
@@ -117,6 +229,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="@string/process_image" />
+
+        <Button
+            android:id="@+id/btnBatchProcess"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/batch_process" />
 
         <TextView
             android:layout_width="match_parent"

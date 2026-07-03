@@ -9,6 +9,10 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.tethershot.app.edit.AdjustmentProcessor
+import com.tethershot.app.edit.EditSettings
+import com.tethershot.app.edit.Filter
+import com.tethershot.app.edit.FilterLibrary
 import com.tethershot.app.export.Exporter
 import com.tethershot.app.lut.CubeLut
 import com.tethershot.app.lut.LutProcessor
@@ -34,11 +38,30 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     val lastPreview = MutableLiveData<Bitmap?>(null)
     val exportCount = MutableLiveData(0)
     val autoExport = MutableLiveData(true)
+    val selectedFilter = MutableLiveData(FilterLibrary.NONE)
+    val editSettings = MutableLiveData(EditSettings.NEUTRAL)
 
     private var camera: PtpCamera? = null
     private var tetherJob: Job? = null
     private var activeLut: CubeLut? = null
     private val knownHandles = HashSet<Int>()
+
+    fun selectFilter(filter: Filter) {
+        selectedFilter.value = filter
+    }
+
+    fun updateEditSettings(settings: EditSettings) {
+        editSettings.value = settings
+    }
+
+    fun resetEdits() {
+        editSettings.value = EditSettings.NEUTRAL
+        selectedFilter.value = FilterLibrary.NONE
+    }
+
+    private fun effectiveSettings(): EditSettings =
+        (editSettings.value ?: EditSettings.NEUTRAL) +
+            (selectedFilter.value ?: FilterLibrary.NONE).settings
 
     fun refreshPresets() {
         presets.value = presetRepo.listPresets()
@@ -170,9 +193,34 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    /** Batch editing: applies the current preset/filter/adjustments to many images. */
+    fun processBatch(uris: List<Uri>) {
+        if (uris.isEmpty()) return
+        viewModelScope.launch(Dispatchers.IO) {
+            var ok = 0
+            for ((i, uri) in uris.withIndex()) {
+                withContext(Dispatchers.Main) {
+                    status.value = "Đang xử lý hàng loạt: ${i + 1}/${uris.size}…"
+                }
+                try {
+                    val bitmap = getApplication<Application>().contentResolver
+                        .openInputStream(uri)?.use { BitmapFactory.decodeStream(it) }
+                        ?: continue
+                    processAndExport(bitmap, "BATCH")
+                    ok++
+                } catch (_: Exception) {
+                }
+            }
+            withContext(Dispatchers.Main) {
+                status.value = "Xong hàng loạt: $ok/${uris.size} ảnh đã xử lý"
+            }
+        }
+    }
+
     private suspend fun processAndExport(bitmap: Bitmap, baseName: String) {
         val lut = activeLut
-        val processed = if (lut != null) LutProcessor.apply(bitmap, lut) else bitmap
+        var processed = if (lut != null) LutProcessor.apply(bitmap, lut) else bitmap
+        processed = AdjustmentProcessor.apply(processed, effectiveSettings())
         withContext(Dispatchers.Main) { lastPreview.value = processed }
         if (autoExport.value == true) {
             try {

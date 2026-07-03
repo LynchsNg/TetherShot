@@ -10,6 +10,7 @@ import android.hardware.usb.UsbManager
 import android.os.Build
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.SeekBar
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
@@ -17,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.viewModels
 import com.tethershot.app.R
 import com.tethershot.app.databinding.ActivityMainBinding
+import com.tethershot.app.edit.FilterLibrary
 import com.tethershot.app.presets.Preset
 import com.tethershot.app.ptp.PtpCamera
 
@@ -33,6 +35,11 @@ class MainActivity : AppCompatActivity() {
     private val pickImageLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             uri?.let { viewModel.processImageFromUri(it) }
+        }
+
+    private val batchImagesLauncher =
+        registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+            if (!uris.isNullOrEmpty()) viewModel.processBatch(uris)
         }
 
     private val usbPermissionReceiver = object : BroadcastReceiver() {
@@ -78,6 +85,10 @@ class MainActivity : AppCompatActivity() {
         binding.btnProcessImage.setOnClickListener {
             pickImageLauncher.launch(arrayOf("image/*"))
         }
+        binding.btnBatchProcess.setOnClickListener {
+            batchImagesLauncher.launch(arrayOf("image/*"))
+        }
+        setupEditControls()
         binding.switchAutoExport.setOnCheckedChangeListener { _, checked ->
             viewModel.autoExport.value = checked
         }
@@ -93,6 +104,39 @@ class MainActivity : AppCompatActivity() {
                 .setNegativeButton(android.R.string.cancel, null)
                 .show()
         }
+    }
+
+    private fun setupEditControls() {
+        val filterAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1,
+            FilterLibrary.ALL.map { it.name })
+        binding.spinnerFilter.setAdapter(filterAdapter)
+        binding.spinnerFilter.setText(FilterLibrary.NONE.name, false)
+        binding.spinnerFilter.setOnItemClickListener { _, _, position, _ ->
+            FilterLibrary.ALL.getOrNull(position)?.let { viewModel.selectFilter(it) }
+        }
+
+        val listener = object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                val current = viewModel.editSettings.value ?: return
+                viewModel.updateEditSettings(when (seekBar.id) {
+                    R.id.seekExposure -> current.copy(exposure = progress)
+                    R.id.seekContrast -> current.copy(contrast = progress)
+                    R.id.seekSaturation -> current.copy(saturation = progress)
+                    R.id.seekTemperature -> current.copy(temperature = progress)
+                    R.id.seekSkinSmooth -> current.copy(skinSmooth = progress)
+                    R.id.seekGrain -> current.copy(grain = progress)
+                    else -> current
+                })
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar) {}
+        }
+        listOf(binding.seekExposure, binding.seekContrast, binding.seekSaturation,
+            binding.seekTemperature, binding.seekSkinSmooth, binding.seekGrain)
+            .forEach { it.setOnSeekBarChangeListener(listener) }
+
+        binding.btnResetEdits.setOnClickListener { viewModel.resetEdits() }
     }
 
     private fun observeViewModel() {
@@ -120,6 +164,17 @@ class MainActivity : AppCompatActivity() {
         }
         viewModel.exportCount.observe(this) { count ->
             binding.txtExportCount.text = getString(R.string.export_count, count)
+        }
+        viewModel.selectedFilter.observe(this) { filter ->
+            binding.spinnerFilter.setText(filter.name, false)
+        }
+        viewModel.editSettings.observe(this) { s ->
+            binding.seekExposure.progress = s.exposure
+            binding.seekContrast.progress = s.contrast
+            binding.seekSaturation.progress = s.saturation
+            binding.seekTemperature.progress = s.temperature
+            binding.seekSkinSmooth.progress = s.skinSmooth
+            binding.seekGrain.progress = s.grain
         }
     }
 
